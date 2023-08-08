@@ -226,6 +226,9 @@ if __name__ == "__main__":
             Give current block height as start value and 0 as end value to
             download the full Arweave!
           </Alert>
+ <Alert severity="info">
+           Recommends adding proxy networks and more number of gateways for a smooth experience and to avoid DDoSing one gateway.
+          </Alert>
         </Stack>
         <Box
           component="form"
