@@ -68,7 +68,7 @@ def configure_logger(file_path):
     console_handler.setLevel(logging.INFO)
 
     # Create formatter and attach it to handlers
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
 
@@ -76,22 +76,19 @@ def configure_logger(file_path):
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
-
 def save_block_data(proxy_url, arweave_url, block_heights, save_directory, stop_event):
     """Downloads and saves block data for the given heights."""
     try:
-        proxies = {"http": proxy_url} if proxy_url else None
-
+        proxies = {'http': proxy_url} if proxy_url else None
+        
         for block_height in block_heights:
             if stop_event.is_set():
                 break  # Stop processing if stop_event is set
 
             try:
-                response = requests.get(
-                    arweave_url.format(height=block_height),
-                    headers={"Accept": "application/json", "X-Block-Format": "2"},
-                    proxies=proxies,
-                )
+                response = requests.get(arweave_url.format(height=block_height),
+                                        headers={'Accept': 'application/json', 'X-Block-Format': '2'},
+                                        proxies=proxies)
                 response.raise_for_status()
                 block_data = response.json()
 
@@ -103,27 +100,24 @@ def save_block_data(proxy_url, arweave_url, block_heights, save_directory, stop_
                 logging.info(f"Saved block {block_height} to {file_path}")
 
             except requests.exceptions.RequestException as e:
-                logging.error(
-                    f"Error with proxy {proxy_url} at block {block_height}: {e}"
-                )
+                logging.error(f'Error with proxy {proxy_url} at block {block_height}: {e}')
                 return block_height
 
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error with proxy {proxy_url}: {e}")
+        logging.error(f'Error with proxy {proxy_url}: {e}')
         return block_heights[0]  # Return the starting block height
-
 
 def main():
     arweave_urls = [
-        "https://g8way.io/block/height/{height}",
-        "https://arweave.net/block/height/{height}",
-        "https://arweave.dev/block/height/{height}",
+        'https://arweave.net/block/height/{height}',
+        'https://arweave.dev/block/height/{height}'
     ]
-
+    
     num_gateways = len(arweave_urls)
 
-
-
+    # Set the range of block heights
+    start_block_height = 1000
+    end_block_height = 500
 
     if start_block_height <= end_block_height:
         print("Error: start_block_height should be greater than end_block_height")
@@ -143,9 +137,7 @@ def main():
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
 
-    log_file_path = os.path.join(
-        log_directory, f"{start_block_height}_{end_block_height}_arweave.log"
-    )
+    log_file_path = os.path.join(log_directory, f"{start_block_height}_{end_block_height}_arweave.log")
     configure_logger(log_file_path)
 
     stop_event = threading.Event()
@@ -159,9 +151,7 @@ def main():
         interrupted_block = start_block_height
 
         try:
-            with concurrent.futures.ThreadPoolExecutor(
-                max_workers=num_gateways
-            ) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=num_gateways) as executor:
                 futures = []
                 for i, arweave_url in enumerate(arweave_urls):
                     start_height = start_block_height - i * height_range
@@ -171,9 +161,7 @@ def main():
 
                     block_heights = list(range(start_height, end_height - 1, -1))
                     num_blocks = len(block_heights)
-                    num_batches = (
-                        num_blocks + 9
-                    ) // 10  # Number of batches, rounded up
+                    num_batches = (num_blocks + 9) // 10  # Number of batches, rounded up
 
                     for batch in range(num_batches):
                         start_idx = batch * 10
@@ -181,20 +169,11 @@ def main():
                         batch_block_heights = block_heights[start_idx:end_idx]
 
                         futures.append(
-                            executor.submit(
-                                save_block_data,
-                                proxy_url,
-                                arweave_url,
-                                batch_block_heights,
-                                save_directory,
-                                stop_event,
-                            )
+                            executor.submit(save_block_data, proxy_url, arweave_url, batch_block_heights, save_directory, stop_event)
                         )
 
                         if len(futures) % 10 == 0:
-                            print(
-                                f"Pausing for 5 seconds on gateway {i+1} with proxy {proxy_url if proxy_url else 'None'}..."
-                            )
+                            print(f"Pausing for 5 seconds on gateway {i+1} with proxy {proxy_url if proxy_url else 'None'}...")
                             time.sleep(5)  # Pause for 5 seconds after every 10 requests
 
                     for future in concurrent.futures.as_completed(futures):
@@ -213,9 +192,7 @@ def main():
                     return
 
             if interrupted_block > end_block_height:
-                print(
-                    f"Interrupted at block {interrupted_block}, switching to the next proxy..."
-                )
+                print(f"Interrupted at block {interrupted_block}, switching to the next proxy...")
             else:
                 print("Proxy completed successfully.")
 
@@ -224,9 +201,9 @@ def main():
             stop_event.set()
             sys.exit(0)  # Exit the script gracefully
 
-
 if __name__ == "__main__":
     main()
+
 `;
 
     setGeneratedCode(code);
